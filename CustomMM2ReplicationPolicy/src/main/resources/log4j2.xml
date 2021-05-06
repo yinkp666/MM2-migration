@@ -25,7 +25,7 @@
             <AppenderRef ref="stdout"/>
             <AppenderRef ref="fileLogger1"/>
         </Logger>
-        <Logger name="com.amazonaws.kafka.samples" level="info" additivity="false">
+        <Logger name="com.airwallex.kafka.samples" level="info" additivity="false">
             <AppenderRef ref="fileLogger1"/>
             <AppenderRef ref="stdout"/>
         </Logger>

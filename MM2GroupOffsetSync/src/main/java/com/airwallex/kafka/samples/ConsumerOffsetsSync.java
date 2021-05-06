@@ -1,9 +1,6 @@
 package com.airwallex.kafka.samples;
 
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.AlterConsumerGroupOffsetsResult;
-import org.apache.kafka.clients.admin.ConsumerGroupDescription;
-import org.apache.kafka.clients.admin.DescribeConsumerGroupsResult;
+import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.apache.kafka.common.TopicPartition;
@@ -18,18 +15,19 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import java.util.*;
 
 class ConsumerOffsetsSync implements Runnable {
     private final AdminClient adminClient;
-    private final String consumerGroupId;
+    private final AdminClient srcAdminClient;
     private static final Logger logger = LogManager.getLogger(ConsumerOffsetsSync.class);
 
-    ConsumerOffsetsSync(String consumerGroupId, AdminClient adminClient) {
+    ConsumerOffsetsSync(AdminClient adminClient, AdminClient srcAdminClient) {
         this.adminClient = adminClient;
-        this.consumerGroupId = consumerGroupId;
+        this.srcAdminClient = srcAdminClient;
     }
 
-    private Map<TopicPartition, OffsetAndMetadata> getCheckpointOffsets() {
+    private Map<TopicPartition, OffsetAndMetadata> getCheckpointOffsets(String consumerGroupId) {
         Map<String, Object> mm2config = new MM2Config().mm2config();
         Map<TopicPartition, OffsetAndMetadata> translatedOffsets = new HashMap<>();
         try {
@@ -46,7 +44,7 @@ class ConsumerOffsetsSync implements Runnable {
         return translatedOffsets;
     }
 
-    private boolean checkConsumerGroups() {
+    private boolean checkConsumerGroups(String consumerGroupId) {
         if (adminClient != null) {
             DescribeConsumerGroupsResult describeConsumerGroupsResult = adminClient.describeConsumerGroups(Collections.singletonList(consumerGroupId));
             Map<String, ConsumerGroupDescription> consumerGroupDescriptions;
@@ -65,7 +63,7 @@ class ConsumerOffsetsSync implements Runnable {
         }
     }
 
-    private Map<TopicPartition, OffsetAndMetadata> listConsumerOffsets(Map<TopicPartition, OffsetAndMetadata> consumerOffsets) {
+    private Map<TopicPartition, OffsetAndMetadata> listConsumerOffsets(String consumerGroupId, Map<TopicPartition, OffsetAndMetadata> consumerOffsets) {
         Map<TopicPartition, OffsetAndMetadata> filteredConsumerGroupOffsets;
         if (adminClient != null) {
             try {
@@ -97,10 +95,10 @@ class ConsumerOffsetsSync implements Runnable {
         return filteredConsumerGroupOffsets;
     }
 
-    private void updateConsumerGroupOffsets(Map<TopicPartition, OffsetAndMetadata> consumerOffsets) {
+    private void updateConsumerGroupOffsets(String consumerGroupId, Map<TopicPartition, OffsetAndMetadata> consumerOffsets) {
 
         if (adminClient != null) {
-            Map<TopicPartition, OffsetAndMetadata> consumergroupOffsets = listConsumerOffsets(consumerOffsets);
+            Map<TopicPartition, OffsetAndMetadata> consumergroupOffsets = listConsumerOffsets(consumerGroupId, consumerOffsets);
             if (consumergroupOffsets.size() > 0) {
                 AlterConsumerGroupOffsetsResult alterConsumerGroupOffsetsResult = adminClient.alterConsumerGroupOffsets(consumerGroupId, consumergroupOffsets);
                 try {
@@ -120,9 +118,27 @@ class ConsumerOffsetsSync implements Runnable {
 
     @Override
     public void run() {
-        if (checkConsumerGroups()) {
-            updateConsumerGroupOffsets(getCheckpointOffsets());
+        ListConsumerGroupsResult listConsumerGroupsResult = srcAdminClient.listConsumerGroups();
+        Collection<ConsumerGroupListing> consumerGroupListings = null;
+        try {
+            consumerGroupListings = listConsumerGroupsResult.valid().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
+        for(ConsumerGroupListing cg : consumerGroupListings) {
+            String consumerGroupId = cg.groupId();
+            logger.info("--------------->" + consumerGroupId);
+            if(!consumerGroupId.startsWith("oprtr")){
+            if (checkConsumerGroups(consumerGroupId)) {
+                updateConsumerGroupOffsets(consumerGroupId, getCheckpointOffsets(consumerGroupId));
+            }
+            }
+        }
+//        if (checkConsumerGroups(consumerGroupId)) {
+//            updateConsumerGroupOffsets(consumerGroupId, getCheckpointOffsets(consumerGroupId));
+//        }
 
     }
 }

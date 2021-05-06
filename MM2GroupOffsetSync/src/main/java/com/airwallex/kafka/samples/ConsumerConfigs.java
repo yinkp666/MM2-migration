@@ -11,6 +11,7 @@ import java.util.Properties;
 
 class ConsumerConfigs {
 
+    private static final String SRC_BOOTSTRAP_SERVERS_CONFIG = "http://127.0.0.2:9092";
     private static final String BOOTSTRAP_SERVERS_CONFIG = "http://127.0.0.1:9092";
     private static final String SSL_TRUSTSTORE_LOCATION_CONFIG = "/tmp/kafka.client.truststore.jks";
     private static final String SSL_KEYSTORE_LOCATION_CONFIG = "/tmp/kafka.client.keystore.jks";
@@ -20,6 +21,7 @@ class ConsumerConfigs {
     private static final String GROUP_ID_CONFIG = "mm2OffsetSync";
     private static final String CLIENT_ID_CONFIG = "mm2OffsetSync";
     private static final String EXCLUDE_INTERNAL_TOPICS = "true";
+
 
 
 
@@ -48,6 +50,7 @@ class ConsumerConfigs {
             consumerProps.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, loadProps.getProperty("BOOTSTRAP_SERVERS_CONFIG", BOOTSTRAP_SERVERS_CONFIG).equals("") ? BOOTSTRAP_SERVERS_CONFIG : loadProps.getProperty("BOOTSTRAP_SERVERS_CONFIG", BOOTSTRAP_SERVERS_CONFIG));
             consumerProps.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, loadProps.getProperty("GROUP_ID_CONFIG", GROUP_ID_CONFIG).equals("") ? GROUP_ID_CONFIG : loadProps.getProperty("GROUP_ID_CONFIG", GROUP_ID_CONFIG));
 
+            consumerProps.setProperty("SRC_BOOTSTRAP_SERVERS_CONFIG", loadProps.getProperty("SRC_BOOTSTRAP_SERVERS_CONFIG", SRC_BOOTSTRAP_SERVERS_CONFIG).equals("") ? SRC_BOOTSTRAP_SERVERS_CONFIG : loadProps.getProperty("SRC_BOOTSTRAP_SERVERS_CONFIG", SRC_BOOTSTRAP_SERVERS_CONFIG));
             consumerProps.setProperty("sasl.mechanism", "SCRAM-SHA-256");
             consumerProps.setProperty("sasl.jaas.config", "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"dataUser\" password=\"dataPass\";");
 

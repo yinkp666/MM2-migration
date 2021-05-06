@@ -86,7 +86,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.amazonaws.kafka.samples.MM2GroupOffsetSync</mainClass>
+                                    <mainClass>com.airwallex.kafka.samples.MM2GroupOffsetSync</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

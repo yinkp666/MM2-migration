@@ -72,9 +72,12 @@ public class MM2GroupOffsetSync {
     private void runConsumerOffsetSyncs() {
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         final AdminClient adminClient = getAdminClient(getAdminClientConfig());
+        final AdminClient srcAdminClient = getAdminClient(getSrcAdminClientConfig());
         long startTime = System.nanoTime();
         logger.info("Start Time: {} \n", TimeUnit.NANOSECONDS.toMillis(startTime));
-        ConsumerOffsetsSync consumerOffsetsSync = new ConsumerOffsetsSync(consumerGroupID, adminClient);
+       // logger.info("------------->"+ConsumerConfigs.consumerConfig().getProperty("SRC_BOOTSTRAP_SERVERS_CONFIG"));
+
+        ConsumerOffsetsSync consumerOffsetsSync = new ConsumerOffsetsSync(adminClient, srcAdminClient);
         executor.scheduleAtFixedRate(consumerOffsetsSync, 0L, MM2GroupOffsetSync.interval, TimeUnit.SECONDS);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown(executor, adminClient, startTime)));
@@ -94,6 +97,20 @@ public class MM2GroupOffsetSync {
 
     private Properties getAdminClientConfig() {
         return ConsumerConfigs.consumerConfig();
+    }
+
+
+    private Properties getSrcAdminClientConfig() {
+        Properties consumerProps = new Properties();
+        consumerProps.setProperty("bootstrap.servers",ConsumerConfigs.consumerConfig().getProperty("SRC_BOOTSTRAP_SERVERS_CONFIG"));
+        consumerProps.setProperty("sasl.mechanism", "SCRAM-SHA-256");
+        consumerProps.setProperty("sasl.jaas.config", "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"dataUser\" password=\"dataPass\";");
+        consumerProps.setProperty("ssl.keystore.location", "/root/kafka_2.12-2.6.1/config/keystore.jks");
+        consumerProps.setProperty("ssl.truststore.location", "/root/kafka_2.12-2.6.1/config/truststore.jks");
+        consumerProps.setProperty("ssl.keystore.password", "airwallex");
+        consumerProps.setProperty("ssl.key.password", "airwallex");
+        consumerProps.setProperty("security.protocol","SASL_SSL");
+        return consumerProps;
     }
 
     private AdminClient getAdminClient(Properties config) {
