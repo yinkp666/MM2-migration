@@ -7,7 +7,6 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.connect.mirror.RemoteClusterUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -129,16 +128,13 @@ class ConsumerOffsetsSync implements Runnable {
         }
         for(ConsumerGroupListing cg : consumerGroupListings) {
             String consumerGroupId = cg.groupId();
-            logger.info("--------------->" + consumerGroupId);
             if(!consumerGroupId.startsWith("oprtr")){
             if (checkConsumerGroups(consumerGroupId)) {
+                logger.info("--------------->" + consumerGroupId);
                 updateConsumerGroupOffsets(consumerGroupId, getCheckpointOffsets(consumerGroupId));
             }
             }
         }
-//        if (checkConsumerGroups(consumerGroupId)) {
-//            updateConsumerGroupOffsets(consumerGroupId, getCheckpointOffsets(consumerGroupId));
-//        }
 
     }
 }

@@ -9,39 +9,19 @@ import java.util.Map;
 
 class MM2Config {
 
-    private boolean sslEnable = false;
-    private boolean mTLSEnable = false;
-
     Map<String, Object> mm2config() {
-
         Map<String, Object> mm2Props = new HashMap<>();
-        mm2Props.put("bootstrap.servers", ConsumerConfigs.consumerConfig().getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG));
+        mm2Props.put("bootstrap.servers", ConsumerConfigs.consumerConfig().getProperty("bootstrap.servers"));
         mm2Props.put("source.cluster.alias", MM2GroupOffsetSync.sourceCluster);
-
-        if (MM2GroupOffsetSync.mTLSEnable){
-            mTLSEnable = true;
-            sslEnable = true;
-        } else {
-            sslEnable = MM2GroupOffsetSync.sslEnable;
-        }
-
-        if (sslEnable){
-            mm2Props.put("sasl.mechanism", "SCRAM-SHA-256");
-            mm2Props.put("sasl.jaas.config", "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"dataUser\" password=\"dataPass\";");
-            mm2Props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
-            mm2Props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, ConsumerConfigs.consumerConfig().getProperty(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG));
-        }
-        if (mTLSEnable){
-            mm2Props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, ConsumerConfigs.consumerConfig().getProperty(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG));
-            mm2Props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, ConsumerConfigs.consumerConfig().getProperty(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG));
-            mm2Props.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, ConsumerConfigs.consumerConfig().getProperty(SslConfigs.SSL_KEY_PASSWORD_CONFIG));
-        }
+        mm2Props.put("sasl.mechanism", ConsumerConfigs.consumerConfig().getProperty("sasl.mechanism"));
+        mm2Props.put("sasl.jaas.config", ConsumerConfigs.consumerConfig().getProperty("sasl.jaas.config"));
+        mm2Props.put("security.protocol",ConsumerConfigs.consumerConfig().getProperty("security.protocol"));
+        mm2Props.put("ssl.truststore.location", ConsumerConfigs.consumerConfig().getProperty("ssl.truststore.location"));
+        mm2Props.put("ssl.keystore.location", ConsumerConfigs.consumerConfig().getProperty("ssl.keystore.location"));
+        mm2Props.put("ssl.truststore.password", ConsumerConfigs.consumerConfig().getProperty("ssl.truststore.password"));
+        mm2Props.put("ssl.keystore.password", ConsumerConfigs.consumerConfig().getProperty("ssl.keystore.password"));
         if (!MM2GroupOffsetSync.replicationPolicyClass.equalsIgnoreCase(String.valueOf(MirrorClientConfig.REPLICATION_POLICY_CLASS_DEFAULT))){
             mm2Props.put(MirrorClientConfig.REPLICATION_POLICY_CLASS, MM2GroupOffsetSync.replicationPolicyClass);
-        }
-
-        if (!MM2GroupOffsetSync.replicationPolicySeparator.equalsIgnoreCase(MirrorClientConfig.REPLICATION_POLICY_SEPARATOR_DEFAULT)){
-            mm2Props.put(MirrorClientConfig.REPLICATION_POLICY_SEPARATOR, MM2GroupOffsetSync.replicationPolicySeparator);
         }
 
         return mm2Props;
