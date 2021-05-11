@@ -1,5 +1,4 @@
 package com.airwallex.kafka.samples;
-
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import org.apache.kafka.clients.admin.AdminClient;

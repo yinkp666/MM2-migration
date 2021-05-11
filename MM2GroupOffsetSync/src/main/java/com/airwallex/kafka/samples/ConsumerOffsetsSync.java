@@ -130,7 +130,7 @@ class ConsumerOffsetsSync implements Runnable {
             String consumerGroupId = cg.groupId();
             if(!consumerGroupId.startsWith("oprtr")){
             if (checkConsumerGroups(consumerGroupId)) {
-                logger.info("--------------->" + consumerGroupId);
+                logger.info("start update offset--------------->" + consumerGroupId);
                 updateConsumerGroupOffsets(consumerGroupId, getCheckpointOffsets(consumerGroupId));
             }
             }

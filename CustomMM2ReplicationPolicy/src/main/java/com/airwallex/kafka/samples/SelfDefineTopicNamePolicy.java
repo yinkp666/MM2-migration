@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Map;
 
-public class CustomMM2ReplicationPolicy extends DefaultReplicationPolicy {
-    private static final Logger logger = LoggerFactory.getLogger(CustomMM2ReplicationPolicy.class);
+public class SelfDefineTopicNamePolicy extends DefaultReplicationPolicy {
+    private static final Logger logger = LoggerFactory.getLogger(com.airwallex.kafka.samples.SelfDefineTopicNamePolicy.class);
     private String sourceClusterAlias;
 
     @Override
@@ -20,11 +20,12 @@ public class CustomMM2ReplicationPolicy extends DefaultReplicationPolicy {
             throw new RuntimeException(message);
         }
 
+
     }
 
     @Override
     public String formatRemoteTopic(String sourceClusterAlias, String topic) {
-        return topic;
+        return sourceClusterAlias;
     }
 
     @Override

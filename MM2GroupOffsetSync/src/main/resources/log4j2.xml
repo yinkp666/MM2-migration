@@ -21,7 +21,7 @@
         <Root level="error">
             <AppenderRef ref="stdout"/>
         </Root>
-        <Logger name="org.apache.kafka.clients" level="warn" additivity="false">
+        <Logger name="org.apache.kafka.clients" level="error" additivity="false">
             <AppenderRef ref="stdout"/>
             <AppenderRef ref="fileLogger1"/>
         </Logger>
