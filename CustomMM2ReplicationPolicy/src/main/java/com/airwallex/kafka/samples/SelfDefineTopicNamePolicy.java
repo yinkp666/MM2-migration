@@ -38,3 +38,4 @@ public class SelfDefineTopicNamePolicy extends DefaultReplicationPolicy {
         return null;
     }
 }
+
